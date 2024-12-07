@@ -1,0 +1,4 @@
+flask
+winsdk
+ytmusicapi
+yt-dlp
