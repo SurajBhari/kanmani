@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyrics UI - Kanmani Anbodu</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            height: 100%;
+            background-color: black; /* Add this line */
+        }
+
+        .bg-image {
+            background-image: url("https://a10.gaanacdn.com/gn_img/albums/Dk9KNk23Bx/k9KNqYP9bB/size_l.webp");
+            -webkit-filter: blur(100px) brightness(0.5);
+            filter: blur(100px) brightness(0.5);
+            height: 100%;
+            width: 100%; /* Add this line to ensure it covers the full width */
+            position: absolute; /* Add this line to position it relative to the viewport */
+            top: 0;
+            left: 0;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .song-info {
+            position: fixed;
+            bottom: 10%;
+            left: 10%;
+            transition: transform 0.3s ease;
+        }
+
+        .song-info.visible{
+            transform: scale(1.6);
+            transition: transform 0.3s ease;
+        }
+        .thumbnail {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: url('https://a10.gaanacdn.com/gn_img/albums/Dk9KNk23Bx/k9KNqYP9bB/size_l.webp') center/cover no-repeat;
+        }
+        .song-artist{
+            position: relative;
+            left: 120%;
+            top: 10%;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            text-align: center;
+            color: hsl(0, 45%, 9%);
+        }
+
+        .song-title {
+            position: relative;
+            left: 120%;
+            top: 10%;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .lyrics-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .lyrics-box::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 5px;
+        }
+
+        .lyrics {
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.8rem;
+            color: #c7c7c7;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: -100px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .controls.visible {
+            transform: translateY(-100%);
+        }
+
+        .controls button {
+            background: #44444400;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="bg-image"></div>
+<div class="container">
+    <div class="lyrics-box">
+        <div class="lyrics">
+            <p>Paatave Paaduchhittiyaa?</p>
+            <p>Aap Naanum,</p>
+        </div>
+    </div>
+    <div class="song-info">
+        <div class="thumbnail"><div class="song-artist">Kamal Hassan</div><div class="song-title">Kanmani Anbodu</div></div>
+    </div>
+</div>
+
+<div class="controls" id="controls">
+    <button>Play</button>
+    <button>Pause</button>
+    <button>Next</button>
+    <button>Previous</button>
+</div>
+
+<script>
+    const controls = document.getElementById('controls');
+    const song_info = document.querySelector('.song-info');
+    window.addEventListener('mousemove', (event) => {
+        const height = window.innerHeight;
+        if (event.clientY > height / 2) {
+            controls.classList.add('visible');
+            // make the song-info bigger with transition
+            song_info.classList.add('visible');
+        } else {
+            controls.classList.remove('visible');
+            song_info.classList.remove('visible');
+        }
+    });
+</script>
+
+</body>
+</html>
