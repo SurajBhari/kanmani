@@ -68,6 +68,7 @@
             margin-bottom: 10px;
             text-align: left;
             color: hsl(0, 45%, 9%);
+            width: max-content;
         }
 
         .song-title {
@@ -111,9 +112,9 @@
             transform: translateY(-100%);
         }
 
-        .controls button {
+        .controls i {
             background: #44444400;
-            color: white;
+            color: rgb(190, 188, 188);
             border: none;
             padding: 10px 20px;
             margin: 5px;
@@ -121,18 +122,40 @@
             cursor: pointer;
         }
     </style>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
+
     <script>
         async function update(){
             var response = await fetch("/data");
             var data = await response.json();
-            console.log(data);
             document.querySelector('.song-artist').innerHTML = data.artist;
             document.querySelector('.song-title').innerHTML = data.title;
-            document.querySelector('.lyrics').innerHTML = data.lyrics;
+            document.querySelector('.lyrics').innerHTML = "";
             document.querySelector('.thumbnail').style.background =`url('${data.thumbnail}') center/cover no-repeat`;
             document.querySelector(".bg-image").style.backgroundImage = `url('${data.thumbnail}')`;
         }
         setInterval(update, 1000);
+        async function previous(){
+            await fetch("/prev");
+        }
+        async function next(){
+            await fetch("/next");
+        }
+        async function playpause(){
+            var result = await fetch("/playpause");
+            var data = await result.text();
+            console.log(data);
+            var playing = data == "True";
+            var pp = document.getElementById("playpause");
+            if(playing){
+                pp.classList.remove("fa-play");
+                pp.classList.add("fa-pause");
+            }  
+            else{
+                pp.classList.remove("fa-pause");
+                pp.classList.add("fa-play");
+            }
+        }
     </script>
 </head>
 <body>
@@ -148,10 +171,9 @@
 </div>
 
 <div class="controls" id="controls">
-    <button>Play</button>
-    <button>Pause</button>
-    <button>Next</button>
-    <button>Previous</button>
+    <i class="fa-solid fa-backward-step" id="prev" onclick="previous()"></i>
+    <i class="fa-solid fa-pause" id="playpause" onclick="playpause()"></i>
+    <i class="fa-solid fa-forward-step" id="next" onclick="next()"></i>
 </div>
 
 <script>

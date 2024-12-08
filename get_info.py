@@ -27,10 +27,15 @@ print("Connected to YouTube Music")
 def get_media_info():
     return asyncio.run(_get_media_info())
 
+def get_current_session():
+    return asyncio.run(_get_current_session())
+
+async def _get_current_session():
+    sessions = await MediaManager.request_async()
+    return sessions.get_current_session()
 
 async def _get_media_info():
-    sessions = await MediaManager.request_async()
-    session = sessions.get_current_session()
+    session = await _get_current_session()
     if not session:
         return None
     pinfo = session.get_playback_info()
