@@ -34,6 +34,7 @@ def hello():
 def data():
     song = get_media_info()
     global last_song
+    global default_song
     if not song:
         last_song = None
         return default_song
@@ -43,10 +44,13 @@ def data():
         last_song = song
         song = populate_yt(song)
     # make a copy of default_song and update the value of song on it to avoid changing the default_song
-    song = default_song.copy()
-    song.update(last_song)
-
-    return json.dumps(song, indent=4, sort_keys=True, default=str)
+    new_song = default_song.copy()
+    # if there is no thumbnail in "song" then the default thumbnail will be used
+    default_thumbnail = default_song['thumbnail']
+    if not song['thumbnail']:
+        song['thumbnail'] = default_thumbnail
+    new_song.update(song)
+    return json.dumps(new_song, indent=4, sort_keys=True, default=str)
 
 @app.route("/play")
 def play():
@@ -72,7 +76,6 @@ def playpause():
     except OSError:
         pass
     playing = session.get_playback_info().playback_status != 4
-    print(playing)
     return "True" if playing else "False"
 
 
