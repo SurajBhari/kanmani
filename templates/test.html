@@ -140,6 +140,16 @@
             document.querySelector('.lyrics').innerHTML = "";
             document.querySelector('.thumbnail').style.background =`url('${data.thumbnail}') center/cover no-repeat`;
             document.querySelector(".bg-image").style.backgroundImage = `url('${data.thumbnail}')`;
+
+            var response = await fetch("/currentposition");
+            var data = await response.json();
+            var slider = document.getElementById("seekbar");
+            // value would be current% of max value
+            slider.setAttribute("value", data.now);
+            slider.setAttribute("max", data.end);
+            slider.setAttribute("min", 0);
+            document.getElementById("starttime").innerHTML = 0;
+            document.getElementById("endtime").innerHTML = data.end;
         }
         setInterval(update, 1000);
         async function previous(){
@@ -178,6 +188,20 @@
 </div>
 
 <div class="controls" id="controls">
+    <div class="slidecontainer" style="max-width: 400px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <p id="starttime" style="margin: 0;">Start Time</p>
+          <input 
+            type="range" 
+            class="slider" 
+            id="seekbar" 
+            style="flex-grow: 1; margin: 0 10px;"
+            disabled
+          >
+          <p id="endtime" style="margin: 0;">End Time</p>
+        </div>
+      </div>
+      
     <i class="fa-solid fa-backward-step" id="prev" onclick="previous()"></i>
     <i class="fa-solid fa-pause" id="playpause" onclick="playpause()"></i>
     <i class="fa-solid fa-forward-step" id="next" onclick="next()"></i>

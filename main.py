@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from get_info import get_media_info, populate_yt, get_current_session
 import json
 from asyncio import run as asyncio_run
@@ -59,15 +59,10 @@ def current_position():
     global last_endtime
     session = get_current_session()
     timeline = session.get_timeline_properties()
-    returning = {}
-    for key in dir(timeline):
-        if not key.startswith("_"):
-            returning[key] = getattr(timeline, key)
     # try to make sense here 
     current_time = datetime.now().timestamp()
     last_updated = timeline.last_updated_time.timestamp()
     time_since_last_updated = current_time - last_updated
-    print(time_since_last_updated)
     # we were at "position" at "last_updated_time"
     # we are now at "position" + "time_since_last_updated"
     now = timeline.position + timedelta(seconds=time_since_last_updated)
@@ -81,19 +76,15 @@ def current_position():
     if session.get_playback_info().playback_status == 5:
         now = timeline.position
     
-
-    returning['lutctimenow'] = datetime.now() - timedelta(hours=5, minutes=30)
-    returning['now'] = now
-    returning['time_since_last_updated'] = time_since_last_updated
-
     
     # lets clean the data a bit and only give the useful values
     useful = {}
-    useful['now'] = now
+    useful['now'] = now.seconds
     useful['start'] = 0
-    useful['end'] = timeline.end_time
+    useful['end'] = timeline.end_time.seconds
     useful['last_updated'] = timeline.last_updated_time
     return json.dumps(useful, indent=4, sort_keys=True, default=str)
+
 @app.route("/lyrics")
 def lyrics():
     song = get_media_info()
