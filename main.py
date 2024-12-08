@@ -2,12 +2,13 @@ from flask import Flask, render_template, jsonify
 from get_info import get_media_info, populate_yt, get_current_session
 import json
 from asyncio import run as asyncio_run
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
 global last_song
 last_song = None
-
+last_endtime = timedelta(seconds=0)
 default_song = {
     "artist": "Unknown",
     "title": "Unknown",
@@ -52,21 +53,78 @@ def data():
     new_song.update(song)
     return json.dumps(new_song, indent=4, sort_keys=True, default=str)
 
+
+@app.route("/currentposition")
+def current_position():
+    global last_endtime
+    session = get_current_session()
+    timeline = session.get_timeline_properties()
+    returning = {}
+    for key in dir(timeline):
+        if not key.startswith("_"):
+            returning[key] = getattr(timeline, key)
+    # try to make sense here 
+    current_time = datetime.now().timestamp()
+    last_updated = timeline.last_updated_time.timestamp()
+    time_since_last_updated = current_time - last_updated
+    print(time_since_last_updated)
+    # we were at "position" at "last_updated_time"
+    # we are now at "position" + "time_since_last_updated"
+    now = timeline.position + timedelta(seconds=time_since_last_updated)
+    # if we are paused then the position is litreally 'position'
+    # if last_endtime is not same as timeline.end_time then we have a new song and we substract 
+    if not last_endtime:
+        last_endtime = timeline.end_time
+    if last_endtime != timeline.end_time:
+        now = timeline.position
+        last_endtime = timeline.end_time
+    if session.get_playback_info().playback_status == 5:
+        now = timeline.position
+    
+
+    returning['lutctimenow'] = datetime.now() - timedelta(hours=5, minutes=30)
+    returning['now'] = now
+    returning['time_since_last_updated'] = time_since_last_updated
+
+    
+    # lets clean the data a bit and only give the useful values
+    useful = {}
+    useful['now'] = now
+    useful['start'] = 0
+    useful['end'] = timeline.end_time
+    useful['last_updated'] = timeline.last_updated_time
+    return json.dumps(useful, indent=4, sort_keys=True, default=str)
+@app.route("/lyrics")
+def lyrics():
+    song = get_media_info()
+
 @app.route("/play")
 def play():
-    return str(get_current_session().try_play_async().get_results())
-
+    try:
+        return str(get_current_session().try_play_async().get_results())
+    except OSError:
+        return "False"
+    
 @app.route("/pause")
 def pause():
-    return str(get_current_session().try_pause_async().get_results())
+    try:
+        return str(get_current_session().try_pause_async().get_results())
+    except OSError:
+        return "False"
 
 @app.route("/next")
 def next():
-    return str(get_current_session().try_skip_next_async().get_results())
+    try:
+        return str(get_current_session().try_skip_next_async().get_results())
+    except OSError:
+        return "False"
 
 @app.route("/prev")
 def prev():
-    return str(get_current_session().try_skip_previous_async().get_results())
+    try:
+        return str(get_current_session().try_skip_previous_async().get_results())
+    except OSError:
+        return "False"
 
 @app.route("/playpause")
 def playpause():
