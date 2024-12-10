@@ -16,28 +16,34 @@
         }
 
         .bg-image {
-            -webkit-filter: blur(100px) brightness(0.5);
-            filter: blur(100px) brightness(0.5);
-            height: 100%;
-            width: 100%; /* Add this line to ensure it covers the full width */
-            position: absolute; /* Add this line to position it relative to the viewport */
-            top: 0;
-            left: 0;
+            position: absolute;
+            width: 200vmax;
+            height: 200vmax;
+            z-index: -1;
+            aspect-ratio: 1;
+
+            background-image: var(--cover-art-url);
+            background-color: var(--color-bg);
+            background-blend-mode: multiply;
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
+
+            filter: blur(180px) brightness(50%) saturate(150%);
+            mix-blend-mode: exclusion;
+
+            animation: bgAnim 60s ease-in-out infinite;
+            transition: ease 2s background-image,
+                ease 2s background-color;
         }
-        @keyframes spin {
-            from {
+        @keyframes bgAnim {
+            0% {
                 transform: rotate(0deg);
             }
-            to {
+
+            100% {
                 transform: rotate(360deg);
             }
-        }
-
-        * {
-            box-sizing: border-box;
         }
 
         .container {
@@ -132,6 +138,11 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
 
     <script>
+        function beautifyseconds(seconds){
+            var minutes = Math.floor(seconds / 60);
+            var seconds = Math.floor(seconds % 60);
+            return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+        }
         async function update(){
             var response = await fetch("/data");
             var data = await response.json();
@@ -148,8 +159,8 @@
             slider.setAttribute("value", data.now);
             slider.setAttribute("max", data.end);
             slider.setAttribute("min", 0);
-            document.getElementById("starttime").innerHTML = 0;
-            document.getElementById("endtime").innerHTML = data.end;
+            document.getElementById("starttime").innerHTML = beautifyseconds(data.now);
+            document.getElementById("endtime").innerHTML = beautifyseconds(data.end);
         }
         setInterval(update, 1000);
         async function previous(){

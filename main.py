@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 global last_song
 last_song = None
-last_endtime = timedelta(seconds=0)
+last_endtime = 0
 default_song = {
     "artist": "Unknown",
     "title": "Unknown",
@@ -53,6 +53,20 @@ def data():
     new_song.update(song)
     return json.dumps(new_song, indent=4, sort_keys=True, default=str)
 
+def beautify(seconds):
+    hour = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    hour = int(hour)
+    minutes = int(minutes)
+    seconds = int(seconds)
+
+    if hour:
+        return f"{hour}:{minutes}:{seconds}"
+    if minutes:
+        return f"{minutes}:{seconds}"
+    return f"{seconds}"
 
 @app.route("/currentposition")
 def current_position():
