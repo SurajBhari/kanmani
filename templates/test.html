@@ -134,21 +134,490 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
+        .lyrics-container {
+            position: absolute;
+            top: 116px;
+            left: 0;
+            z-index: 0;
+            width: 100vw;
+            height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: ease .2s;
+        }
+
+        html:is(.widget-mode, .no-playing-indicator) .lyrics-container {
+            top: 0;
+        }
+
+        #lyrics {
+            width: 75%;
+            height: 75%;
+            overflow-x: clip;
+            overflow-y: hidden;
+            display: flex;
+            gap: 16px;
+            flex-direction: column;
+            align-items: center;
+            --mask-image: linear-gradient(
+                0deg,
+                rgba(0,0,0,0) 0%,
+                rgba(0,0,0,1) 25%,
+                rgba(0,0,0,1) 75%,
+                rgba(0,0,0,0) 100%
+            );
+            mask-image: var(--mask-image);
+            -webkit-mask-image: var(--mask-image);
+            transition: ease .2s filter;
+            scroll-behavior: smooth;
+            scrollbar-gutter: stable both-edges;
+        }
+
+        #lyrics::before, #lyrics::after {
+            content: "";
+            position: relative;
+            width: 100%;
+            padding-top: calc(50vh / 2 - 24px);
+        }
+
+        #lyrics .line {
+            position: relative;
+            display: block;
+            font-weight: 500;
+            color: var(--color-fg);
+            font-size: 36px;
+            text-align: center;
+        }
+
+        #lyrics .line.empty,
+        #lyrics.synchronized .line.empty {
+            margin: 8px;
+        }
+
+        #lyrics .line .word,
+        #lyrics.synchronized .line .word {
+            position: relative;
+        }
+
+        #lyrics .line .translation,
+        #lyrics.synchronized .line .translation {
+            margin: 4px 0;
+            font-size: 36px;
+            opacity: 0.5;
+            display: block;
+        }
+
+        #lyrics.synchronized,
+        html.non-interactive #lyrics.synchronized:hover {
+            overflow-y: hidden;
+        }
+
+        #lyrics:hover {
+            overflow-y: scroll;
+        }
+
+        #lyrics.synchronized .line {
+            color: var(--color-fg);
+            opacity: 0.7;
+            transition: ease .2s;
+            border-radius: 16px;
+            padding: 4px 8px;
+            font-size: 48px;
+            margin: 4px 0;
+            transform: scale(0.75);
+        }
+
+        #lyrics.synchronized .line.empty {
+            transform: scale(1);
+        }
+
+        html:not(.no-clickable-lyrics, .non-interactive) #lyrics.synchronized :is(.line, .word)::before {
+            position: absolute;
+            content: "";
+            content-visibility: none;
+            top: -4px;
+            left: -8px;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            border-radius: 16px;
+            padding: 4px 8px;
+            background-color: var(--color-bg);
+            opacity: 0;
+            transition: ease .2s opacity;
+        }
+
+        html:not(.no-clickable-lyrics, .non-interactive) #lyrics.synchronized .line::before {
+            box-sizing: border-box;
+            top: 0px;
+            left: 0px;
+        }
+
+        html:not(.no-clickable-lyrics, .non-interactive) #lyrics.synchronized .word::before {
+            box-sizing: content-box;
+        }
+
+        #lyrics.synchronized .line.active {
+            display: block;
+            color: var(--color-fg);
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        html:not(.no-clickable-lyrics, .non-interactive) #lyrics.synchronized .line:hover::before,
+        html:not(.no-clickable-lyrics, .non-interactive) #lyrics.synchronized .line .word:hover::before {
+            opacity: 0.5;
+        }
+
+        #lyrics.synchronized .line .word {
+            background-image: linear-gradient(90deg, var(--color-fg) 50%, color-mix(in srgb, var(--color-fg), transparent 40%) 50%);
+            background-position-x: 100%;
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        #lyrics.synchronized .line.active .word.active {
+            background-position-x: 0%;
+            transition: var(--word-duration) ease-out background-position-x;
+        }
+
+        #lyrics.synchronized .line.active.empty {
+            overflow: visible;
+        }
+
+        #lyrics.synchronized .line.empty .empty-progress {
+            width: 70vw;
+            opacity: 0;
+            height: 2px;
+            background-color: var(--color-fg);
+            transition: 0.2s linear;
+        }
+
+        #lyrics.synchronized .line.active.empty .empty-progress {
+            width: calc((1 - var(--waitTime)) * 70vw);
+            opacity: calc(1 - var(--waitTime));
+        }
+
+        #lyrics.synchronized .line:is([distance="-1"], [distance="1"]) {
+            opacity: 0.7;
+            filter: blur(2px);
+        }
+
+        html.widget-mode #lyrics.synchronized .line:is([distance="-1"], [distance="1"]) {
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .75)) blur(2px);
+        }
+
+        #lyrics.synchronized .line:is([distance="-2"], [distance="2"]) {
+            opacity: 0.56;
+            filter: blur(4px);
+        }
+
+        html.widget-mode #lyrics.synchronized .line:is([distance="-2"], [distance="2"]){
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .75)) blur(4px);
+        }
+
+        #lyrics.synchronized .line:is([distance="-3"], [distance="3"]) {
+            opacity: 0.42;
+            filter: blur(8px);
+        }
+
+        html.widget-mode #lyrics.synchronized .line:is([distance="-3"], [distance="3"]){
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .75)) blur(8px);
+        }
+
+        #lyrics.synchronized .line:is([distance="-4"], [distance="4"]) {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        html.widget-mode #lyrics.synchronized .line:is([distance="-4"], [distance="4"]) {
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .75));
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="-4"] {
+            transform: scale(0.75) translateY(-32px);
+            transition: .2s ease;
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="-3"] {
+            transform: scale(0.75) translateY(-24px);
+            transition: .2s ease;
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="-2"] {
+            transform: scale(0.75) translateY(-16px);
+            transition: .2s ease;
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="-1"] {
+            transform: scale(0.75) translateY(-8px);
+            transition: .2s ease;
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="1"] {
+            transform: scale(0.75) translateY(24px);
+            transition: .2s ease,
+                        1s ease-out transform;
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="2"] {
+            transform: scale(0.75) translateY(48px);
+            transition: .2s ease,
+                        1.2s ease-out transform;
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="3"] {
+            transform: scale(0.75) translateY(96px);
+            transition: .2s ease,
+                        1.4s ease-out transform;
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:not(:hover) .line[distance="4"] {
+            transform: scale(0.75) translateY(192px);
+            transition: .2s ease,
+                        1.6s ease-out transform;
+        }
+
+        html.no-lyrics-blur #lyrics.synchronized .line:is(
+            [distance="-4"],
+            [distance="-3"],
+            [distance="-2"],
+            [distance="-1"],
+            [distance="1"],
+            [distance="2"],
+            [distance="3"],
+            [distance="4"]
+        ) {
+            filter: none;
+        }
+
+        html.widget-mode.no-lyrics-blur #lyrics.synchronized .line:is(
+            [distance="-4"],
+            [distance="-3"],
+            [distance="-2"],
+            [distance="-1"],
+            [distance="1"],
+            [distance="2"],
+            [distance="3"],
+            [distance="4"]
+        ) {
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .75));
+        }
+
+        html:not(.non-interactive) #lyrics.synchronized:hover .line:is(
+            [distance="-4"],
+            [distance="-3"],
+            [distance="-2"],
+            [distance="-1"],
+            [distance="1"],
+            [distance="2"],
+            [distance="3"],
+            [distance="4"]
+        ) {
+            opacity: 1;
+            filter: blur(0px);
+            visibility: visible;
+        }
+
+        html.widget-mode:not(.non-interactive) #lyrics.synchronized:hover .line:is(
+            [distance="-4"],
+            [distance="-3"],
+            [distance="-2"],
+            [distance="-1"],
+            [distance="1"],
+            [distance="2"],
+            [distance="3"],
+            [distance="4"]
+        ){
+            opacity: 1;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .75)) blur(0px);
+            visibility: visible;
+        }
+
+        #lyrics-copyright {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            position: absolute;
+            bottom: 56px;
+            right: 56px;
+            width: 40vw;
+            font-size: 12px;
+            color: var(--color-fg);
+            opacity: 0;
+            text-align: right;
+            overflow: hidden;
+            -webkit-line-clamp: 3;
+            text-overflow: ellipsis;
+            transition: ease .2s;
+            pointer-events: none;
+        }
+
+        html.idle #lyrics-copyright {
+            opacity: 0.6;
+        }
+
+        html.widget-mode #lyrics > *,
+        html.widget-mode #lyrics-copyright {
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .75));
+        }
+
+        html.no-show-lyrics #lyrics,
+        html.no-show-lyrics #lyrics-copyright {
+            display: none;
+        }
+
+        /* iPad */
+        @media only screen and (max-width: 1024px) {
+            .lyrics-container {
+                top: 80px;
+                height: calc(100vh - 152px);
+            }
+
+            #lyrics {
+                gap: 12px;
+            }
+
+            #lyrics .line {
+                font-size: 24px;
+            }
+
+            #lyrics.synchronized .line {
+                font-size: 36px;
+            }
+
+            #lyrics::before, #lyrics::after {
+                padding-top: calc(50vh / 2 - 16px);
+            }
+
+            #lyrics .line .translation,
+            #lyrics.synchronized .line .translation {
+                font-size: 24px;
+            }
+
+            #lyrics-copyright {
+                bottom: 40px;
+                right: 40px;
+            }
+        }
+
+        /* iPhone */
+        @media only screen and (max-width: 812px) {
+            .lyrics-container {
+                top: 52px;
+                height: calc(100vh - 88px);
+            }
+
+            #lyrics {
+                gap: 8px;
+            }
+
+            #lyrics .line {
+                font-size: 20px;
+            }
+
+            #lyrics.synchronized .line {
+                font-size: 24px;
+            }
+
+            #lyrics .line .translation,
+            #lyrics.synchronized .line .translation {
+                font-size: 16px;
+            }
+
+            #lyrics::before, #lyrics::after {
+                padding-top: calc(50vh / 2 - 8px);
+            }
+
+            #lyrics-copyright {
+                font-size: 8px;
+                bottom: 24px;
+                right: 24px;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
 
     <script>
+        var lyrics_data = null;
         function beautifyseconds(seconds){
             var minutes = Math.floor(seconds / 60);
             var seconds = Math.floor(seconds % 60);
             return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
         }
+        function get_lyrics(){
+            fetch("/lyrics")
+            .then(response => response.json())
+            .then(data => {
+                lyrics_data = data;
+            });
+        }
+        function add_lyrics(){
+            if (!lyrics_data) return;
+            var container = document.getElementById("lyrics")
+            document.documentElement.classList.remove("no-lyrics");
+                for (let lineIndex = 0; lineIndex < lyrics_data.lyrics.length; lineIndex++) {
+                    const line = lyrics_data.lyrics[lineIndex];
+                    const elem = document.createElement("span");
+		            elem.classList.add("line");
+                    elem.textContent = line.text;
+                    container.appendChild(elem);
+                }
+        }
+        function update_lyrics_position(){
+            if(!lyrics_data) return;
+            if(!lyrics_data.synchronized) return;
+            var container = document.getElementById("lyrics");
+            container.classList.add("synchronized");
+            // we get the active line
+            let lineIndex = lyrics_data.lines.length - 1;
+            for (let i = -1; i < lyrics_data.lines.length; i++) {
+                // @ts-ignore
+                if (elapsed < lyrics_data.lines[i + 1]?.time) {
+                    lineIndex = i;
+                    break;
+                }
+            }
+            var wasActiveBefore = container.children[lineIndex]?.classList?.contains("active");
+            for (let i = 0; i < container.children.length; i++) {
+                const line = container.children[i];
+                if (i === lineIndex){
+
+                    if(line.classList.contains("empty")){
+                        // determine empty progress
+                        const emptyProgress = [...line.children].find(x => x.classList.contains("empty-progress"));
+
+                        const percentageToGo = (elapsed - lyrics_data.lines[i].time) / ((lyrics_data.lines[i + 1]?.time || songdata.metadata.length) - lyrics_data.lines[i].time);
+                        emptyProgress.style.setProperty("--waitTime", `${percentageToGo}`);
+                    }
+
+                    line.removeAttribute("distance");
+                    line.classList?.add("active");
+                }else{
+                    const distance = Math.max(-4, Math.min(i - lineIndex, 4));
+                    line.setAttribute("distance", `${distance}`);
+                    line.classList?.remove("active");
+                }
+            }
+            if (!wasActiveBefore && !isContainerHovered) {
+                // invalidate previous animation
+                if(animateStatus)
+                    animateStatus.invalidated = true;
+
+                // call new animation
+                animateStatus = animateScroll(container.children[lineIndex]);
+            }
+
+        }
         async function update(){
             var response = await fetch("/data");
             var data = await response.json();
+            var prev_song_name = document.querySelector('.song-title').innerHTML;
             document.querySelector('.song-artist').innerHTML = data.artist;
             document.querySelector('.song-title').innerHTML = data.title;
-            document.querySelector('.lyrics').innerHTML = "";
             document.querySelector('.thumbnail').style.background =`url('${data.thumbnail}') center/cover no-repeat`;
             document.querySelector(".bg-image").style.backgroundImage = `url('${data.thumbnail}')`;
 
@@ -161,6 +630,31 @@
             slider.setAttribute("min", 0);
             document.getElementById("starttime").innerHTML = beautifyseconds(data.now);
             document.getElementById("endtime").innerHTML = beautifyseconds(data.end);
+            if(prev_song_name != document.querySelector('.song-title').innerHTML){
+                get_lyrics();
+                // place lyrics in the lyrics div
+                var container = document.getElementById("lyrics");
+                container.classList.remove("synchronized");
+
+                while(container.firstChild){
+                    container.removeChild(container.lastChild);
+                }
+                if(!lyrics_data){
+                    document.documentElement.classList.add("no-lyrics");
+                    const noLyrics = document.createElement("span");
+                    noLyrics.classList.add("line");
+                    noLyrics.textContent = "No lyrics found";
+                    container.appendChild(noLyrics);
+                    noLyrics.scrollIntoView({
+                        inline: "center",
+                        block: "center",
+                        behavior: "smooth"
+                    });
+                    return;
+                }
+                add_lyrics();
+            }
+            update_lyrics_position();
         }
         setInterval(update, 1000);
         async function previous(){
@@ -189,9 +683,9 @@
 <body>
 <div class="bg-image"></div>
 <div class="container">
-    <div class="lyrics-box">
-        <div class="lyrics">
-        </div>
+    <div class="lyrics-container">
+		<div id="lyrics"></div>
+	</div>
     </div>
     <div class="song-info">
         <div class="thumbnail"><div class="song-artist"></div><div class="song-title"></div></div>
