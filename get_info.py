@@ -61,9 +61,10 @@ async def _get_media_info():
 def populate_yt(
     info_dict,
 ):  # populate info_dict with yt info  so that we don't spam the yt api. and only call it when we need to
+    title = info_dict["title"].split("|")[0].strip().lower()
     try:
         search = yt.search(
-            f'{info_dict["title"]} {info_dict["artist"]}', filter="songs", limit=1
+            f'{title} {info_dict["artist"]}', filter="songs", limit=1
         )
     except Exception as e:
         print(e)
@@ -73,7 +74,7 @@ def populate_yt(
     id = ""
     artists = []
     if search:
-        if info_dict["title"] in search[0]["title"]:
+        if title.replace(" ", "") in search[0]["title"].lower().replace(" ", ""):
             thumbnail = search[0]["thumbnails"][-1]["url"]
             link = f"https://music.youtube.com/watch?v={search[0]['videoId']}"
             id = search[0]["videoId"]
