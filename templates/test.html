@@ -15,15 +15,17 @@
             background-color: black; /* Add this line */
         }
 
-        .bg-image {
+        .background {
+            top: -50vh;
+            left: -25vw;
+            isolation: isolate;
+            content: "";
+
             position: absolute;
             width: 200vmax;
             height: 200vmax;
             z-index: -1;
             aspect-ratio: 1;
-
-            background-image: var(--cover-art-url);
-            background-color: var(--color-bg);
             background-blend-mode: multiply;
             background-position: center;
             background-repeat: no-repeat;
@@ -33,9 +35,9 @@
             mix-blend-mode: exclusion;
 
             animation: bgAnim 60s ease-in-out infinite;
-            transition: ease 2s background-image,
-                ease 2s background-color;
+
         }
+
         @keyframes bgAnim {
             0% {
                 transform: rotate(0deg);
@@ -95,7 +97,7 @@
         }
 
         .lyrics-box::-webkit-scrollbar {
-            width: 8px;
+            display: none;
         }
 
         .lyrics-box::-webkit-scrollbar-thumb {
@@ -108,6 +110,7 @@
             font-size: 1.2rem;
             line-height: 1.8rem;
             color: #c7c7c7;
+            scrollbar-width: none;
         }
 
         .controls {
@@ -557,6 +560,7 @@
         }
         function add_lyrics(){
             if (!lyrics_data) return;
+            if(!lyrics_data.lyrics) return;
             var container = document.getElementById("lyrics")
             document.documentElement.classList.remove("no-lyrics");
             for (let lineIndex = 0; lineIndex < lyrics_data.lyrics.length; lineIndex++) {
@@ -654,7 +658,7 @@
             document.querySelector('.song-artist').innerHTML = data.artist;
             document.querySelector('.song-title').innerHTML = data.title;
             document.querySelector('.thumbnail').style.background =`url('${data.thumbnail}') center/cover no-repeat`;
-            document.querySelector(".bg-image").style.backgroundImage = `url('${data.thumbnail}')`;
+            document.querySelector(".background").style.backgroundImage = `url('${data.thumbnail}')`;
 
             var response = await fetch("/currentposition");
             var data = await response.json();
@@ -716,7 +720,7 @@
     </script>
 </head>
 <body>
-<div class="bg-image"></div>
+<div class="background"></div>
 <div class="container">
     <div class="lyrics-container">
 		<div id="lyrics"></div>
