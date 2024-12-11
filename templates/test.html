@@ -548,8 +548,8 @@
             var seconds = Math.floor(seconds % 60);
             return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
         }
-        function get_lyrics(){
-            fetch("/lyrics")
+        async function get_lyrics(){
+            await fetch("/lyrics")
             .then(response => response.json())
             .then(data => {
                 lyrics_data = data;
@@ -559,24 +559,24 @@
             if (!lyrics_data) return;
             var container = document.getElementById("lyrics")
             document.documentElement.classList.remove("no-lyrics");
-                for (let lineIndex = 0; lineIndex < lyrics_data.lyrics.length; lineIndex++) {
-                    const line = lyrics_data.lyrics[lineIndex];
-                    const elem = document.createElement("span");
-		            elem.classList.add("line");
-                    elem.textContent = line.text;
-                    container.appendChild(elem);
-                }
+            for (let lineIndex = 0; lineIndex < lyrics_data.lyrics.length; lineIndex++) {
+                const line = lyrics_data.lyrics[lineIndex];
+                const elem = document.createElement("span");
+                elem.classList.add("line");
+                elem.textContent = line.text;
+                container.appendChild(elem);
+            }
         }
-        function update_lyrics_position(){
+        function update_lyrics_position(elapsed){
             if(!lyrics_data) return;
             if(!lyrics_data.synchronized) return;
             var container = document.getElementById("lyrics");
             container.classList.add("synchronized");
             // we get the active line
-            let lineIndex = lyrics_data.lines.length - 1;
-            for (let i = -1; i < lyrics_data.lines.length; i++) {
+            let lineIndex = lyrics_data.lyrics.length - 1;
+            for (let i = -1; i < lyrics_data.lyrics.length; i++) {
                 // @ts-ignore
-                if (elapsed < lyrics_data.lines[i + 1]?.time) {
+                if (elapsed < lyrics_data.lyrics[i + 1]?.time) {
                     lineIndex = i;
                     break;
                 }
@@ -589,8 +589,7 @@
                     if(line.classList.contains("empty")){
                         // determine empty progress
                         const emptyProgress = [...line.children].find(x => x.classList.contains("empty-progress"));
-
-                        const percentageToGo = (elapsed - lyrics_data.lines[i].time) / ((lyrics_data.lines[i + 1]?.time || songdata.metadata.length) - lyrics_data.lines[i].time);
+                        const percentageToGo = (elapsed - lyrics_data.lyrics[i].time) / ((lyrics_data.lyrics[i + 1].time || songdata.metadata.length) - lyrics_data.lyrics[i].time);
                         emptyProgress.style.setProperty("--waitTime", `${percentageToGo}`);
                     }
 
@@ -602,15 +601,51 @@
                     line.classList?.remove("active");
                 }
             }
-            if (!wasActiveBefore && !isContainerHovered) {
-                // invalidate previous animation
-                if(animateStatus)
-                    animateStatus.invalidated = true;
 
-                // call new animation
-                animateStatus = animateScroll(container.children[lineIndex]);
+            animateStatus = animateScroll(container.children[lineIndex]);
+        }
+        function animateScroll(element, duration) {
+            if(!element) return;
+            if(!duration) duration= 500;
+
+            const parent = element.parentElement;
+            if(!parent) return;
+
+            let start;
+
+            const begin = parent.scrollTop;
+            const goal = ((element.offsetTop - parent.offsetTop) + (element.offsetHeight / 2)) - (parent.offsetHeight / 2);
+
+            const status = {
+                invalidated: false,
+                completed: false
+            };
+
+            function step(timestamp){
+                if (start === undefined)
+                    start = timestamp;
+
+                const elapsedTimestamp = timestamp - start;
+                const elapsed = Math.min(1, elapsedTimestamp / duration);
+                const easing = (t) => 1 + --t * t * t * t * t;
+                const timed = easing(elapsed);
+
+                const target = begin * (1 - timed) + goal * timed;
+
+                if (elapsed >= 1 || parent.matches(`${parent.nodeName}:hover`) || status.invalidated) {
+                    status.completed = true;
+                    return;
+                }
+
+                parent.scrollTo({
+                    top: target,
+                    behavior: "instant"
+                });
+
+                window.requestAnimationFrame(step);
             }
-
+            window.requestAnimationFrame(step);
+            return status;
         }
         async function update(){
             var response = await fetch("/data");
@@ -631,7 +666,7 @@
             document.getElementById("starttime").innerHTML = beautifyseconds(data.now);
             document.getElementById("endtime").innerHTML = beautifyseconds(data.end);
             if(prev_song_name != document.querySelector('.song-title').innerHTML){
-                get_lyrics();
+                await get_lyrics();
                 // place lyrics in the lyrics div
                 var container = document.getElementById("lyrics");
                 container.classList.remove("synchronized");
@@ -654,7 +689,7 @@
                 }
                 add_lyrics();
             }
-            update_lyrics_position();
+            update_lyrics_position(data.now+1); // add 1 second cuz we believe it take time to do above things
         }
         setInterval(update, 1000);
         async function previous(){
