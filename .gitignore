@@ -1,0 +1,4 @@
+config.json
+test*
+lyrics.json
+__pycache__/

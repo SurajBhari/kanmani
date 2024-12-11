@@ -33,7 +33,65 @@ default_song = {
     "artists": [],
 }
 
+def write_config(config: dict): 
+    with open("config.json", "w") as file:
+        file.write(json.dumps(config, indent=4))
+    return True
+
+try:
+    file = open("config.json.sample", "r")
+    try:
+        default_config = json.load(file)
+    except json.JSONDecodeError:
+        default_config = {}
+    file.close()
+except FileNotFoundError:
+    default_config = {}
+
+try:
+    file = open("config.json", "r")
+    try:
+        config = json.load(file)
+    except json.JSONDecodeError:
+        print("Corrupted config file, using default config")
+        config = default_config
+    file.close()
+except FileNotFoundError:
+    print("No config file found, using default config")
+    # copy the default config to the config file
+    with open("config.json", "w") as file:
+        file.write(json.dumps(default_config, indent=4))
+    config = default_config
+    if not default_config:
+        exit("No default config found, exiting")
+
 known_songs_lyrics = {} # "artist-title": lyrics
+
+
+def get_token() -> str:
+    base_url = "https://apic-desktop.musixmatch.com/ws/1.1/"    
+    params = {
+        "app_id": "web-desktop-app-v1.0",
+        "t": ''.join(random.choices(string.ascii_lowercase, k=8))
+    }
+    try:
+        response = requests.get(f"{base_url}token.get?{urlencode(params)}")
+        response.raise_for_status()
+        result = response.json()
+        return result.get("message", {}).get("body", {}).get("user_token", "")
+    except requests.RequestException:
+        print("Failed to fetch Musixmatch token!")
+        return ""
+    
+
+musixmatch_token = config.get("musixmatch_token", None)
+if not musixmatch_token:
+    for x in range(3):
+        musixmatch_token = get_token()
+        if musixmatch_token:
+            config["musixmatch_token"] = musixmatch_token
+            write_config(config)
+            
 
 @app.route("/")
 def hello():
@@ -77,30 +135,6 @@ def beautify(seconds):
     return f"{seconds}"
 
 
-def get_token() -> str:
-    base_url = "https://apic-desktop.musixmatch.com/ws/1.1/"    
-    params = {
-        "app_id": "web-desktop-app-v1.0",
-        "t": ''.join(random.choices(string.ascii_lowercase, k=8))
-    }
-    try:
-        response = requests.get(f"{base_url}token.get?{urlencode(params)}")
-        response.raise_for_status()
-        result = response.json()
-        return result.get("message", {}).get("body", {}).get("user_token", "")
-    except requests.RequestException:
-        print("Failed to fetch Musixmatch token!")
-        return ""
-
-correct_token = None
-if "token.txt" in os.listdir():
-    with open("token.txt", "r") as file:
-        correct_token = file.read().strip()
-while not correct_token:
-    correct_token = get_token()
-    if correct_token:
-        with open("token.txt", "w") as file:
-            file.write(correct_token)
 @app.route("/currentposition")
 def current_position():
     global last_endtime
@@ -142,7 +176,7 @@ def _lyrics():
     if f"{artist}-{title}" in known_songs_lyrics:
         return jsonify(known_songs_lyrics[f"{artist}-{title}"])
     
-    l = lyrics.musixmatch(artist, title, correct_token)
+    l = lyrics.musixmatch(artist, title, musixmatch_token)
     known_songs_lyrics[f"{artist}-{title}"] = l
     return jsonify(l)
 
