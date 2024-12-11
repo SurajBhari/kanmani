@@ -139,6 +139,8 @@ def beautify(seconds):
 def current_position():
     global last_endtime
     session = get_current_session()
+    if not session:
+        return {}
     timeline = session.get_timeline_properties()
     # try to make sense here 
     current_time = datetime.now().timestamp()
@@ -170,7 +172,7 @@ def current_position():
 def _lyrics():
     song = get_media_info()
     if not song:
-        return ""
+        return {}
     artist = song['artist']
     title = song['title']
     if f"{artist}-{title}" in known_songs_lyrics:

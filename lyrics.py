@@ -61,8 +61,10 @@ def musixmatch(artist: str, title: str, token:str) -> dict:
 
         body = result.get("message", {}).get("body", {})
         macro_calls = body.get("macro_calls", {})
-       
-        subtitle = macro_calls.get("track.subtitles.get", {}).get("message", {}).get("body", {}).get("subtitle_list", [{}])[0].get("subtitle", {})
+        try:
+            subtitle = macro_calls.get("track.subtitles.get", {}).get("message", {}).get("body", {}).get("subtitle_list", [{}])[0].get("subtitle", {})
+        except (AttributeError, IndexError):
+            subtitle = None
         if subtitle:
             subtitle_body = subtitle.get("subtitle_body", [])
             if not subtitle_body:
@@ -78,8 +80,10 @@ def musixmatch(artist: str, title: str, token:str) -> dict:
                 "copyright": subtitle.get("lyrics_copyright", "").replace("\n", " • ").strip(),
                 "synchronized": True
             }
-        
-        lyrics = macro_calls.get("track.lyrics.get", {}).get("message", {}).get("body", {}).get("lyrics", {})
+        try:
+            lyrics = macro_calls.get("track.lyrics.get", {}).get("message", {}).get("body", {}).get("lyrics", {})
+        except (AttributeError, IndexError):
+            lyrics = None
         if lyrics:
             return {
                 "provider": "Musixmatch",
