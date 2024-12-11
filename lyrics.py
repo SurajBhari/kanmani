@@ -11,7 +11,10 @@ def genius(artist, title):
     search_url = f"{url}?q={artist} {title}&per_page=1"
     response = requests.get(search_url)
     data = response.json()
-    song = data["response"]["sections"][0]["hits"][0]["result"]
+    try:
+        song = data["response"]["sections"][0]["hits"][0]["result"]
+    except (KeyError, IndexError):
+        return {}
     song_url = song["url"]
     print(song_url)
     soup = BeautifulSoup(requests.get(song_url).text, "html.parser")
@@ -62,6 +65,8 @@ def musixmatch(artist: str, title: str, token:str) -> dict:
         subtitle = macro_calls.get("track.subtitles.get", {}).get("message", {}).get("body", {}).get("subtitle_list", [{}])[0].get("subtitle", {})
         if subtitle:
             subtitle_body = subtitle.get("subtitle_body", [])
+            if not subtitle_body:
+                return {}
             subtitle_body = json.loads(subtitle_body)
             lines = [
                 {"text": v["text"], "time": v["time"]["total"]}
