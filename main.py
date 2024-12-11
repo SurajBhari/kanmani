@@ -177,6 +177,8 @@ def _lyrics():
         return jsonify(known_songs_lyrics[f"{artist}-{title}"])
     
     l = lyrics.musixmatch(artist, title, musixmatch_token)
+    if not l:
+        l = lyrics.genius(artist, title)
     known_songs_lyrics[f"{artist}-{title}"] = l
     return jsonify(l)
 
