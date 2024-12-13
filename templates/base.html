@@ -131,11 +131,11 @@
             slider.setAttribute("min", 0);
             document.getElementById("starttime").innerHTML = beautifyseconds(data.now);
             document.getElementById("endtime").innerHTML = beautifyseconds(data.end);
+            var lyrics_container = document.getElementById("lyrics");
             if(!lyrics_container){
                 return; // in this case we don't have any place to show lyrics. 
             }
             if(prev_song_name != document.querySelector('.song-title').innerHTML){
-                var lyrics_container = document.getElementById("lyrics");
                 
                 await get_lyrics();
                 // place lyrics in the lyrics div
