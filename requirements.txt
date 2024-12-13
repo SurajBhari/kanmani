@@ -2,3 +2,4 @@ flask
 winsdk
 ytmusicapi
 yt-dlp
+syncedlyrics

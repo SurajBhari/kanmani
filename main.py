@@ -3,7 +3,7 @@ from get_info import get_media_info, populate_yt, get_current_session
 import json
 from asyncio import run as asyncio_run
 from datetime import datetime, timedelta
-import lyrics
+import syncedlyrics
 import random
 import string
 import requests
@@ -178,11 +178,21 @@ def _lyrics():
     if f"{artist}-{title}" in known_songs_lyrics:
         return jsonify(known_songs_lyrics[f"{artist}-{title}"])
     
-    l = lyrics.musixmatch(artist, title, musixmatch_token)
-    if not l:
-        l = lyrics.genius(artist, title)
-    known_songs_lyrics[f"{artist}-{title}"] = l
-    return jsonify(l)
+    lrc = syncedlyrics.search(f"{title} {artist}")
+    if not lrc:
+        known_songs_lyrics[f"{artist}-{title}"]
+        return {"lyrics": [], "synchronized": False}
+    lyrics = {"lyrics":[]}
+    for line in lrc.split("\n"):
+        time = line.split(" ")[0]
+        text = " ".join(line.split(" ")[1:])
+        time = datetime.strptime(time, "[%M:%S.%f]")
+        seconds = time.minute * 60 + time.second 
+        microseconds = time.microsecond
+        lyrics["lyrics"].append({"text": text.strip(), "time": float(f"{seconds}.{microseconds}")})
+    lyrics["synchronized"] = True
+    known_songs_lyrics[f"{artist}-{title}"] = lyrics
+    return lyrics
 
 @app.route("/play")
 def play():
