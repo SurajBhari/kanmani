@@ -174,16 +174,22 @@ def _lyrics():
     if not song:
         return {}
     artist = song['artist']
+    if "topic" in artist.lower():
+        artist = artist.split(" - ")[0]
     title = song['title']
     if f"{artist}-{title}" in known_songs_lyrics:
         return jsonify(known_songs_lyrics[f"{artist}-{title}"])
     
     lrc = syncedlyrics.search(f"{title} {artist}")
+    with open("lyrics.txt", "w") as file:
+        file.write(lrc)
     if not lrc:
         known_songs_lyrics[f"{artist}-{title}"]
         return {"lyrics": [], "synchronized": False}
     lyrics = {"lyrics":[]}
     for line in lrc.split("\n"):
+        if "[length:" in line:
+            continue
         timestamp_end_position = line.find("]") + 1
         text = line[timestamp_end_position:]
         time = line[:timestamp_end_position] #[00:08.48] चोक पुराओ, माटी रंगाओ
