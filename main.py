@@ -183,13 +183,12 @@ def _lyrics():
         return jsonify(known_songs_lyrics[f"{artist}-{title}"])
     
     lrc = syncedlyrics.search(f"{title} {artist}")
-    subs = pylrc.parse(lrc)
-
     with open("lyrics.txt", "w", encoding="utf-8") as file:
         file.write(lrc)
     if not lrc:
         known_songs_lyrics[f"{artist}-{title}"]
         return {"lyrics": [], "synchronized": False}
+    subs = pylrc.parse(lrc)
     lyrics = {"lyrics":[]}
     for line in subs:
         text = line.text
