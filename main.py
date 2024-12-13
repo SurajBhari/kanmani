@@ -97,7 +97,7 @@ if not musixmatch_token:
 
 @app.route("/")
 def hello():
-    return render_template("test.html")
+    return render_template("main.html")
 
 @app.route("/data")
 def data():

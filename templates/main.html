@@ -1,0 +1,49 @@
+{%extends 'base.html'%}
+{% block content %}
+<body>
+    <div class="background"></div>
+    <div class="lyrics-container">
+        <div id="lyrics"></div>
+    </div>
+    <div class="song-info">
+        <div class="thumbnail"><div class="song-artist"></div><div class="song-title"></div></div>
+        </div>
+    </div>
+    
+    <div class="controls" id="controls">
+        <div class="slidecontainer" style="max-width: 400px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <p id="starttime" style="margin: 0;">Start Time</p>
+              <input 
+                type="range" 
+                class="slider" 
+                id="seekbar" 
+                style="flex-grow: 1; margin: 0 10px;"
+                disabled
+              >
+              <p id="endtime" style="margin: 0;">End Time</p>
+            </div>
+          </div>
+          
+        <i class="fa-solid fa-backward-step" id="prev" onclick="previous()"></i>
+        <i class="fa-solid fa-pause" id="playpause" onclick="playpause()"></i>
+        <i class="fa-solid fa-forward-step" id="next" onclick="next()"></i>
+    </div>
+    
+    <script>
+        const controls = document.getElementById('controls');
+        const song_info = document.querySelector('.song-info');
+        window.addEventListener('mousemove', (event) => {
+            const height = window.innerHeight;
+            if (event.clientY > height / 2) {
+                controls.classList.add('visible');
+                // make the song-info bigger with transition
+                song_info.classList.add('visible');
+            } else {
+                controls.classList.remove('visible');
+                song_info.classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+{% endblock %}
