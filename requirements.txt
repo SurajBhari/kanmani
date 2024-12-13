@@ -3,3 +3,4 @@ winsdk
 ytmusicapi
 yt-dlp
 syncedlyrics
+git+https://github.com/doakey3/pylrc

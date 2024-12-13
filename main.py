@@ -9,6 +9,8 @@ import string
 import requests
 from urllib.parse import urlencode
 import os
+import pylrc
+
 
 app = Flask(__name__)
 
@@ -181,22 +183,18 @@ def _lyrics():
         return jsonify(known_songs_lyrics[f"{artist}-{title}"])
     
     lrc = syncedlyrics.search(f"{title} {artist}")
-    with open("lyrics.txt", "w") as file:
+    subs = pylrc.parse(lrc)
+
+    with open("lyrics.txt", "w", encoding="utf-8") as file:
         file.write(lrc)
     if not lrc:
         known_songs_lyrics[f"{artist}-{title}"]
         return {"lyrics": [], "synchronized": False}
     lyrics = {"lyrics":[]}
-    for line in lrc.split("\n"):
-        if "[length:" in line:
-            continue
-        timestamp_end_position = line.find("]") + 1
-        text = line[timestamp_end_position:]
-        time = line[:timestamp_end_position] #[00:08.48] चोक पुराओ, माटी रंगाओ
-        time = datetime.strptime(time, "[%M:%S.%f]")
-        seconds = time.minute * 60 + time.second 
-        microseconds = time.microsecond
-        lyrics["lyrics"].append({"text": text.strip(), "time": float(f"{seconds}.{microseconds}")})
+    for line in subs:
+        text = line.text
+        time = line.time
+        lyrics["lyrics"].append({"text": text.strip(), "time": time})
     lyrics["synchronized"] = True
     known_songs_lyrics[f"{artist}-{title}"] = lyrics
     return lyrics
