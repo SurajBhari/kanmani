@@ -1,5 +1,41 @@
 {%extends 'base.html'%}
+{% block head_content %}
+    <style>
+        .song-artist{
+            color: rgb(255, 255, 255);
+        }
+        .song-info {
+            transition: opacity 0.5s ease-in-out; /* Smooth transition over 0.5 seconds */
+        }
+    </style>
+    <script>
+        // remove older update funciton 
+        async function update(){
+            // 
+            var response = await fetch("/data");
+            var data = await response.json();
+            var prev_song_name = document.querySelector('.song-title').innerHTML;
+            document.querySelector('.song-artist').innerHTML = data.artist;
+            document.querySelector('.song-title').innerHTML = data.title;
+            document.querySelector('.thumbnail').style.backgroundImage = `url(${data.thumbnail})`;
 
+            var response = await fetch("/currentposition");
+            var data = await response.json();
+            if(!data.playing){
+                // set HTML opacity to 0
+                document.querySelector('.song-info').style.opacity = 0;
+            } else {
+                // set HTML opacity to 1
+                document.querySelector('.song-info').style.opacity = 1;
+            }
+        }
+    </script>
+{% endblock %}
+{% block content %}
 <body>
-    
+    <div class="song-info">
+        <div class="thumbnail"><div class="song-artist"></div><div class="song-title"></div></div>
+        </div>
+    </div>
 </body>
+{% endblock %}

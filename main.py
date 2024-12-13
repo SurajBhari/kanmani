@@ -99,6 +99,9 @@ if not musixmatch_token:
 def hello():
     return render_template("main.html")
 
+@app.route("/obs")
+def obs():
+    return render_template("obs.html")
 @app.route("/data")
 def data():
     song = get_media_info()
@@ -116,7 +119,7 @@ def data():
     new_song = default_song.copy()
     # if there is no thumbnail in "song" then the default thumbnail will be used
     default_thumbnail = default_song['thumbnail']
-    if not song['thumbnail']:
+    if not song.get('thumbnail', None):
         song['thumbnail'] = default_thumbnail
     new_song.update(song)
     return json.dumps(new_song, indent=4, sort_keys=True, default=str)
@@ -158,7 +161,9 @@ def current_position():
     if last_endtime != timeline.end_time:
         now = timeline.position
         last_endtime = timeline.end_time
+    playing = True
     if session.get_playback_info().playback_status == 5:
+        playing = False
         now = timeline.position
     
     
@@ -168,6 +173,7 @@ def current_position():
     useful['start'] = 0
     useful['end'] = timeline.end_time.seconds
     useful['last_updated'] = timeline.last_updated_time
+    useful['playing'] = playing
     return json.dumps(useful, indent=4, sort_keys=True, default=str)
 
 @app.route("/lyrics")

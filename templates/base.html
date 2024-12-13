@@ -6,7 +6,6 @@
     <title>Kanmani</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
-
     <script>
         var lyrics_data = null;
         function beautifyseconds(seconds){
@@ -132,7 +131,12 @@
             slider.setAttribute("min", 0);
             document.getElementById("starttime").innerHTML = beautifyseconds(data.now);
             document.getElementById("endtime").innerHTML = beautifyseconds(data.end);
+            if(!lyrics_container){
+                return; // in this case we don't have any place to show lyrics. 
+            }
             if(prev_song_name != document.querySelector('.song-title').innerHTML){
+                var lyrics_container = document.getElementById("lyrics");
+                
                 await get_lyrics();
                 // place lyrics in the lyrics div
                 var container = document.getElementById("lyrics");
@@ -158,7 +162,6 @@
             }
             update_lyrics_position(data.now+1); // add 1 second cuz we believe it take time to do above things
         }
-        setInterval(update, 1000);
         async function previous(){
             await fetch("/prev");
         }
@@ -180,6 +183,10 @@
                 pp.classList.add("fa-play");
             }
         }
+        document.addEventListener("DOMContentLoaded", function(){
+            update();
+            setInterval(update, 1000);
+        });
     </script>
     {% block head_content %}{% endblock %}
 </head>
