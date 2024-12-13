@@ -184,8 +184,9 @@ def _lyrics():
         return {"lyrics": [], "synchronized": False}
     lyrics = {"lyrics":[]}
     for line in lrc.split("\n"):
-        time = line.split(" ")[0]
-        text = " ".join(line.split(" ")[1:])
+        timestamp_end_position = line.find("]") + 1
+        text = line[timestamp_end_position:]
+        time = line[:timestamp_end_position] #[00:08.48] चोक पुराओ, माटी रंगाओ
         time = datetime.strptime(time, "[%M:%S.%f]")
         seconds = time.minute * 60 + time.second 
         microseconds = time.microsecond
