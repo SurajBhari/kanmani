@@ -3,7 +3,7 @@ import json
 from ytmusicapi import YTMusic
 import requests
 from time import sleep
-
+import re 
 from winsdk.windows.media.control import (
     GlobalSystemMediaTransportControlsSessionManager as MediaManager,
 )
@@ -42,9 +42,20 @@ async def _get_media_info():
     info = await session.try_get_media_properties_async()
     timeline = session.get_timeline_properties()
     # song_attr[0] != '_' ignores system attributes
+    artist = info.artist
+    if artist:
+        if "topic" in artist.lower():
+            artist = artist.split("-")[0].strip()
+    title = info.title
+    if title:
+        separators = ["\\|", "-", ":", "\\(", "\\[", "lyric", "lyrics", "lyrical", "full song", "title", "full video"]
+        for sep in separators:
+            if sep.replace("\\", "") in title.lower():
+                title = re.split(sep, title, flags=re.IGNORECASE)
+                title = title[0].strip()
     info_dict = {
-        "artist": info.artist,
-        "title": info.title,
+        "artist": artist,
+        "title": title,
         "genres": [x for x in info.genres],
         "playback_status": pinfo.playback_status,
         "playback_type": pinfo.playback_type,

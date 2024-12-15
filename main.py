@@ -13,8 +13,9 @@ import pylrc
 
 
 app = Flask(__name__)
-
+global current_song
 global last_song
+current_song = None
 last_song = None
 last_endtime = 0
 default_song = {
@@ -107,6 +108,7 @@ def data():
     song = get_media_info()
     global last_song
     global default_song
+    global current_song
     if not song:
         last_song = None
         return default_song
@@ -122,6 +124,7 @@ def data():
     if not song.get('thumbnail', None):
         song['thumbnail'] = default_thumbnail
     new_song.update(song)
+    current_song = new_song
     return json.dumps(new_song, indent=4, sort_keys=True, default=str)
 
 def beautify(seconds):
@@ -178,22 +181,20 @@ def current_position():
 
 @app.route("/lyrics")
 def _lyrics():
-    song = get_media_info()
+    song = current_song
     if not song:
         return {}
     artist = song['artist']
-    if "topic" in artist.lower():
-        artist = artist.split(" - ")[0]
     title = song['title']
     if f"{artist}-{title}" in known_songs_lyrics:
         return jsonify(known_songs_lyrics[f"{artist}-{title}"])
     
     lrc = syncedlyrics.search(f"{title} {artist}")
     with open("lyrics.txt", "w", encoding="utf-8") as file:
-        file.write(lrc) if lrc else file.write("No lyrics found")
+        file.write(f"{artist} {title}\n"+lrc) if lrc else file.write("No lyrics found")
     if not lrc:
-        known_songs_lyrics[f"{artist}-{title}"]
-        return {"lyrics": [], "synchronized": False}
+        known_songs_lyrics[f"{artist}-{title}"] = {}
+        return known_songs_lyrics[f"{artist}-{title}"]
     subs = pylrc.parse(lrc)
     lyrics = {"lyrics":[]}
     for line in subs:
