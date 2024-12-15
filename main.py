@@ -10,6 +10,7 @@ import requests
 from urllib.parse import urlencode
 import os
 import pylrc
+import re
 
 
 app = Flask(__name__)
@@ -110,6 +111,7 @@ def data():
     if not song:
         last_song = None
         return default_song
+    song['artist'], song['title'] = clean_up(song['artist'], song['title'])
     if last_song and last_song['title'] == song['title']:
         song = last_song
     else:
@@ -176,24 +178,29 @@ def current_position():
     useful['playing'] = playing
     return json.dumps(useful, indent=4, sort_keys=True, default=str)
 
+def clean_up(artist, title):
+    if "topic" in artist.lower():
+        artist = artist.replace("Topic", "").strip()
+    separators = ["\\|", "-", ":", "\\(", "\\[", "lyric", "lyrics", "lyrical", "full song", "title", "full video"]
+    for sep in separators:
+        if sep.replace("\\", "") in title.lower():
+            title = re.split(sep, title, flags=re.IGNORECASE)
+            title = title[0].strip()
+    return artist, title
 @app.route("/lyrics")
 def _lyrics():
-    song = get_media_info()
-    if not song:
-        return {}
-    artist = song['artist']
-    if "topic" in artist.lower():
-        artist = artist.split(" - ")[0]
-    title = song['title']
+    artist = request.args.get("artist", "Unknown")
+    title = request.args.get("title", "Unknown")
+    artist, title = clean_up(artist, title)
     if f"{artist}-{title}" in known_songs_lyrics:
-        return jsonify(known_songs_lyrics[f"{artist}-{title}"])
-    
+        return jsonify(known_songs_lyrics[f"{artist}-{title}"])  
+    print(f"Searching for {title} {artist}")  
     lrc = syncedlyrics.search(f"{title} {artist}")
     with open("lyrics.txt", "w", encoding="utf-8") as file:
         file.write(lrc) if lrc else file.write("No lyrics found")
     if not lrc:
-        known_songs_lyrics[f"{artist}-{title}"]
-        return {"lyrics": [], "synchronized": False}
+        known_songs_lyrics[f"{artist}-{title}"] = {"lyrics": [], "synchronized": False}
+        return known_songs_lyrics[f"{artist}-{title}"]
     subs = pylrc.parse(lrc)
     lyrics = {"lyrics":[]}
     for line in subs:
