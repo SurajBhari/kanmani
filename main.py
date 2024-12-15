@@ -34,6 +34,7 @@ default_song = {
     "link": "Unknown",
     "id": "Unknown",
     "artists": [],
+    "album":""
 }
 
 def write_config(config: dict): 
@@ -186,7 +187,7 @@ def clean_up(artist, title):
     # remove the extra "-" from the title 
     if "topic" in artist.lower():
         artist = artist.replace("Topic", "").strip()
-    separators = ["\\|", "-", ":", "\\(", "\\[", "lyric", "lyrics", "lyrical", "full song", "title", "full video"]
+    separators = ["\\|", "-", ":", "\\(", "\\[", "lyric", "lyrics", "lyrical", "song", "full", "title", "video"]
     for sep in separators:
         if sep.replace("\\", "") in title.lower():
             title = re.split(sep, title, flags=re.IGNORECASE)

@@ -120,6 +120,10 @@
             var data = await response.json();
             var prev_song_name = document.querySelector('.song-title').innerHTML;
             document.querySelector('.song-artist').innerHTML = data.artist;
+            console.log(data);
+            if(data.album){
+                document.querySelector('.song-artist').innerHTML = `${data.artist} - ${data.album}`;
+            }
             document.querySelector('.song-title').innerHTML = data.title;
             document.querySelector('.thumbnail').style.background =`url('${data.thumbnail}') center/cover no-repeat`;
             document.querySelector(".background").style.backgroundImage = `url('${data.thumbnail}')`;

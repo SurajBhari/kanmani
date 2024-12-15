@@ -72,6 +72,7 @@ def populate_yt(
     thumbnail = ""
     link = ""
     id = ""
+    album = ""
     artists = []
     if search:
         if title.replace(" ", "") in search[0]["title"].lower().replace(" ", ""):
@@ -79,10 +80,12 @@ def populate_yt(
             link = f"https://music.youtube.com/watch?v={search[0]['videoId']}"
             id = search[0]["videoId"]
             artists = search[0]["artists"]
+            album = search[0]["album"]["name"]
     info_dict["thumbnail"] = thumbnail
     info_dict["link"] = link
     info_dict["id"] = id
     info_dict["artists"] = artists
+    info_dict["album"] = album
     return info_dict
 
 
