@@ -13,8 +13,9 @@
             var seconds = Math.floor(seconds % 60);
             return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
         }
-        async function get_lyrics(){
-            await fetch("/lyrics")
+        async function get_lyrics(artist, title){
+            var lyrics_url = "/lyrics?" + new URLSearchParams({artist, title}).toString();
+            await fetch(lyrics_url)
             .then(response => response.json())
             .then(data => {
                 lyrics_data = data;
@@ -39,14 +40,15 @@
             var container = document.getElementById("lyrics");
             container.classList.add("synchronized");
             // we get the active line
-            let lineIndex = lyrics_data.lyrics.length - 1;
-            for (let i = -1; i < lyrics_data.lyrics.length; i++) {
-                // @ts-ignore
-                if (elapsed < lyrics_data.lyrics[i + 1].time) {
+            let lineIndex = 0;
+            for (let i = lyrics_data.lyrics.length-1; i > -1; i--) {
+                if (elapsed > lyrics_data.lyrics[i].time) {
                     lineIndex = i;
                     break;
                 }
             }
+            console.log("lineIndex", lineIndex);
+            console.log(lyrics_data.lyrics[lineIndex]);
             var wasActiveBefore = container.children[lineIndex].classList.contains("active");
             for (let i = 0; i < container.children.length; i++) {
                 const line = container.children[i];
@@ -123,14 +125,14 @@
             document.querySelector(".background").style.backgroundImage = `url('${data.thumbnail}')`;
 
             var response = await fetch("/currentposition");
-            var data = await response.json();
+            var current_position = await response.json();
             var slider = document.getElementById("seekbar");
             // value would be current% of max value
-            slider.setAttribute("value", data.now);
-            slider.setAttribute("max", data.end);
+            slider.setAttribute("value", current_position.now);
+            slider.setAttribute("max", current_position.end);
             slider.setAttribute("min", 0);
-            document.getElementById("starttime").innerHTML = beautifyseconds(data.now);
-            document.getElementById("endtime").innerHTML = beautifyseconds(data.end);
+            document.getElementById("starttime").innerHTML = beautifyseconds(current_position.now);
+            document.getElementById("endtime").innerHTML = beautifyseconds(current_position.end);
             var lyrics_container = document.getElementById("lyrics");
             if(!lyrics_container){
                 return; // in this case we don't have any place to show lyrics. 
@@ -142,7 +144,7 @@
                 while(container.firstChild){
                     container.removeChild(container.lastChild);
                 }
-                await get_lyrics();
+                await get_lyrics(data.artist, data.title);
                 // place lyrics in the lyrics div
                 
                 if(!lyrics_data){
@@ -160,7 +162,7 @@
                 }
                 add_lyrics();
             }
-            update_lyrics_position(data.now+1); // add 1 second cuz we believe it take time to do above things
+            update_lyrics_position(current_position.now);
         }
         async function previous(){
             await fetch("/prev");
