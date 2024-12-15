@@ -179,6 +179,11 @@ def current_position():
     return json.dumps(useful, indent=4, sort_keys=True, default=str)
 
 def clean_up(artist, title):
+    if artist.lower() in title.lower(): # Abdul Hannan - Haaray         ---- title
+        title = title.replace(artist, "").strip()
+        title= title.replace("-","").strip()
+        title = title.replace("–", "").strip() # FUCK YOU https://www.youtube.com/watch?v=R-sh3kfdHQ4
+    # remove the extra "-" from the title 
     if "topic" in artist.lower():
         artist = artist.replace("Topic", "").strip()
     separators = ["\\|", "-", ":", "\\(", "\\[", "lyric", "lyrics", "lyrical", "full song", "title", "full video"]
