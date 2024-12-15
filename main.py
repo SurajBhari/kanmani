@@ -190,7 +190,7 @@ def _lyrics():
     
     lrc = syncedlyrics.search(f"{title} {artist}")
     with open("lyrics.txt", "w", encoding="utf-8") as file:
-        file.write(lrc)
+        file.write(lrc) if lrc else file.write("No lyrics found")
     if not lrc:
         known_songs_lyrics[f"{artist}-{title}"]
         return {"lyrics": [], "synchronized": False}

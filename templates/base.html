@@ -42,12 +42,12 @@
             let lineIndex = lyrics_data.lyrics.length - 1;
             for (let i = -1; i < lyrics_data.lyrics.length; i++) {
                 // @ts-ignore
-                if (elapsed < lyrics_data.lyrics[i + 1]?.time) {
+                if (elapsed < lyrics_data.lyrics[i + 1].time) {
                     lineIndex = i;
                     break;
                 }
             }
-            var wasActiveBefore = container.children[lineIndex]?.classList?.contains("active");
+            var wasActiveBefore = container.children[lineIndex].classList.contains("active");
             for (let i = 0; i < container.children.length; i++) {
                 const line = container.children[i];
                 if (i === lineIndex){
@@ -60,11 +60,11 @@
                     }
 
                     line.removeAttribute("distance");
-                    line.classList?.add("active");
+                    line.classList.add("active");
                 }else{
                     const distance = Math.max(-4, Math.min(i - lineIndex, 4));
                     line.setAttribute("distance", `${distance}`);
-                    line.classList?.remove("active");
+                    line.classList.remove("active");
                 }
             }
 
@@ -136,15 +136,15 @@
                 return; // in this case we don't have any place to show lyrics. 
             }
             if(prev_song_name != document.querySelector('.song-title').innerHTML){
-                
-                await get_lyrics();
-                // place lyrics in the lyrics div
                 var container = document.getElementById("lyrics");
                 container.classList.remove("synchronized");
 
                 while(container.firstChild){
                     container.removeChild(container.lastChild);
                 }
+                await get_lyrics();
+                // place lyrics in the lyrics div
+                
                 if(!lyrics_data){
                     document.documentElement.classList.add("no-lyrics");
                     const noLyrics = document.createElement("span");
