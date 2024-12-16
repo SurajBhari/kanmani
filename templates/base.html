@@ -47,8 +47,6 @@
                     break;
                 }
             }
-            console.log("lineIndex", lineIndex);
-            console.log(lyrics_data.lyrics[lineIndex]);
             var wasActiveBefore = container.children[lineIndex].classList.contains("active");
             for (let i = 0; i < container.children.length; i++) {
                 const line = container.children[i];
@@ -120,7 +118,6 @@
             var data = await response.json();
             var prev_song_name = document.querySelector('.song-title').innerHTML;
             document.querySelector('.song-artist').innerHTML = data.artist;
-            console.log(data);
             if(data.album){
                 document.querySelector('.song-artist').innerHTML = `${data.artist} - ${data.album}`;
             }
@@ -166,7 +163,14 @@
                 }
                 add_lyrics();
             }
-            update_lyrics_position(current_position.now);
+            var delay = document.getElementById("delay");
+            if(delay){
+                delay = parseInt(delay.value);
+            }
+            else{
+                delay = 0;
+            }
+            update_lyrics_position(current_position.now+delay);
         }
         async function previous(){
             await fetch("/prev");
@@ -177,7 +181,6 @@
         async function playpause(){
             var result = await fetch("/playpause");
             var data = await result.text();
-            console.log(data);
             var playing = data == "True";
             var pp = document.getElementById("playpause");
             if(playing){

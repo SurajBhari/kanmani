@@ -29,6 +29,9 @@
         <i class="fa-solid fa-backward-step" id="prev" onclick="previous()"></i>
         <i class="fa-solid fa-pause" id="playpause" onclick="playpause()"></i>
         <i class="fa-solid fa-forward-step" id="next" onclick="next()"></i>
+        <!--a delay value holder. can be from -60 to 60-->
+        <p style="display: inline;">Delay: <span id="delay-value">0</span></p>
+        <input type="range" id="delay" min="-10" max="10" value="0" step="1" style="display: inline;">
     </div>
     
     <script>
@@ -44,6 +47,9 @@
                 controls.classList.remove('visible');
                 song_info.classList.remove('visible');
             }
+        });
+        document.getElementById("delay").addEventListener("input", function(){
+            document.getElementById("delay-value").textContent = this.value;
         });
     </script>
 </body>
