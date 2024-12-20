@@ -130,6 +130,15 @@
             var response = await fetch("/currentposition");
             var current_position = await response.json();
             var slider = document.getElementById("seekbar");
+            var play_pause_icon = document.getElementById("playpause");
+            if(current_position.playing){
+                play_pause_icon.classList.remove("fa-play");
+                play_pause_icon.classList.add("fa-pause");
+            }
+            else{
+                play_pause_icon.classList.remove("fa-pause");
+                play_pause_icon .classList.add("fa-play");
+            }
             // value would be current% of max value
             slider.setAttribute("value", current_position.now);
             slider.setAttribute("max", current_position.end);
