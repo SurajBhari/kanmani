@@ -20,6 +20,8 @@
             .then(data => {
                 lyrics_data = data;
             });
+            lyrics_data['artist'] = artist;
+            lyrics_data['title'] = title;
         }
         function add_lyrics(){
             if (!lyrics_data) return;
@@ -138,7 +140,7 @@
             if(!lyrics_container){
                 return; // in this case we don't have any place to show lyrics. 
             }
-            if(prev_song_name != document.querySelector('.song-title').innerHTML){
+            if(prev_song_name != document.querySelector('.song-title').innerHTML || lyrics_data['song'] != data.title){
                 var container = document.getElementById("lyrics");
                 container.classList.remove("synchronized");
 
