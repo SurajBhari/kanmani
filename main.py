@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_file
 from get_info import get_media_info, populate_yt, get_current_session
 import json
 from asyncio import run as asyncio_run
@@ -202,6 +202,9 @@ def ll():
         last_lyrics = {"lyrics": [], "synchronized": False}
     return last_lyrics
 
+@app.route("/favicon.ico")
+def favicon():
+    return send_file("./static/favicon.ico")
 
 @app.route("/lyrics")
 def _lyrics():
