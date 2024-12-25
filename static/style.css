@@ -67,6 +67,7 @@ body {
     height: 150px;
     border-radius: 10px;
     margin-bottom: 20px;
+    background-repeat: no-repeat;
 }
 .song-artist{
     position: relative;
