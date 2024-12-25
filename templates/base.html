@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
     <script>
-        var lyrics_data = null;
+        var lyrics_data = {"artist": null, "title": null, "lyrics": null, "synchronized": null};
         function beautifyseconds(seconds){
             var minutes = Math.floor(seconds / 60);
             var seconds = Math.floor(seconds % 60);
@@ -37,7 +37,7 @@
             }
         }
         function update_lyrics_position(elapsed){
-            if(!lyrics_data) return;
+            if(!lyrics_data.title) return;
             if(!lyrics_data.synchronized) return;
             var container = document.getElementById("lyrics");
             container.classList.add("synchronized");
@@ -49,7 +49,12 @@
                     break;
                 }
             }
-            var wasActiveBefore = container.children[lineIndex].classList.contains("active");
+            if(container.children[lineIndex]){
+                var wasActiveBefore = container.children[lineIndex].classList.contains("active");
+            }
+            else{
+                var wasActiveBefore = false; // element never existed before.
+            }
             for (let i = 0; i < container.children.length; i++) {
                 const line = container.children[i];
                 if (i === lineIndex){
@@ -149,7 +154,13 @@
             if(!lyrics_container){
                 return; // in this case we don't have any place to show lyrics. 
             }
-            if(prev_song_name != document.querySelector('.song-title').innerHTML || lyrics_data['song'] != data.title){
+            if(prev_song_name != document.querySelector('.song-title').innerHTML || lyrics_data['title'] != data.title){
+                console.log(lyrics_data)
+                console.log("calling for new lyrics. here are the details")
+                console.log("prev song name", prev_song_name)
+                console.log("song-title innerhtml", document.querySelector('.song-title').innerHTML)
+                console.log("lyrics_data['title']", lyrics_data['title'])
+                console.log("data.title", data.title)
                 var container = document.getElementById("lyrics");
                 container.classList.remove("synchronized");
 

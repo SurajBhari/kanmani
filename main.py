@@ -17,6 +17,8 @@ app = Flask(__name__)
 
 global last_song
 last_song = None
+global last_lyrics
+last_lyrics = None
 last_endtime = 0
 default_song = {
     "artist": "Unknown",
@@ -193,8 +195,16 @@ def clean_up(artist, title):
             title = re.split(sep, title, flags=re.IGNORECASE)
             title = title[0].strip()
     return artist, title
+@app.route("/lastlyrics")
+def ll():
+    print(last_lyrics)
+    return last_lyrics
+
+
 @app.route("/lyrics")
 def _lyrics():
+    global last_lyrics
+
     artist = request.args.get("artist", "Unknown")
     title = request.args.get("title", "Unknown")
     artist, title = clean_up(artist, title)
@@ -205,7 +215,8 @@ def _lyrics():
     with open("lyrics.txt", "w", encoding="utf-8") as file:
         file.write(lrc) if lrc else file.write("No lyrics found")
     if not lrc:
-        known_songs_lyrics[f"{artist}-{title}"] = {"lyrics": [], "synchronized": False}
+        last_lyrics = {"lyrics": [], "synchronized": False}
+        known_songs_lyrics[f"{artist}-{title}"] = last_lyrics
         return known_songs_lyrics[f"{artist}-{title}"]
     subs = pylrc.parse(lrc)
     lyrics = {"lyrics":[]}
@@ -215,6 +226,7 @@ def _lyrics():
         lyrics["lyrics"].append({"text": text.strip(), "time": time})
     lyrics["synchronized"] = True
     known_songs_lyrics[f"{artist}-{title}"] = lyrics
+    last_lyrics = lyrics
     return lyrics
 
 @app.route("/play")
