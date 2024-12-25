@@ -197,7 +197,9 @@ def clean_up(artist, title):
     return artist, title
 @app.route("/lastlyrics")
 def ll():
-    print(last_lyrics)
+    global last_lyrics
+    if not last_lyrics:
+        last_lyrics = {"lyrics": [], "synchronized": False}
     return last_lyrics
 
 
