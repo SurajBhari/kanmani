@@ -74,31 +74,6 @@ except FileNotFoundError:
 known_songs_lyrics = {} # "artist-title": lyrics
 
 
-def get_token() -> str:
-    base_url = "https://apic-desktop.musixmatch.com/ws/1.1/"    
-    params = {
-        "app_id": "web-desktop-app-v1.0",
-        "t": ''.join(random.choices(string.ascii_lowercase, k=8))
-    }
-    try:
-        response = requests.get(f"{base_url}token.get?{urlencode(params)}")
-        response.raise_for_status()
-        result = response.json()
-        return result.get("message", {}).get("body", {}).get("user_token", "")
-    except requests.RequestException:
-        print("Failed to fetch Musixmatch token!")
-        return ""
-    
-
-musixmatch_token = config.get("musixmatch_token", None)
-if not musixmatch_token:
-    for x in range(3):
-        musixmatch_token = get_token()
-        if musixmatch_token:
-            config["musixmatch_token"] = musixmatch_token
-            write_config(config)
-            
-
 @app.route("/")
 def hello():
     return render_template("main.html")

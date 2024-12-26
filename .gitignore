@@ -2,3 +2,5 @@ config.json
 test*
 lyrics.json
 __pycache__/
+search.json
+lyrics*
